@@ -412,6 +412,7 @@ LRESULT CALLBACK MainWnd::WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
   }
 
   LRESULT result = 0;
+  // chanper: msg from peerconnection client
   if (me) {
     void* prev_nested_msg = me->nested_msg_;
     me->nested_msg_ = &msg;
@@ -430,7 +431,7 @@ LRESULT CALLBACK MainWnd::WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
     }
 
     me->nested_msg_ = prev_nested_msg;
-  } else {
+  } else {  // chanper: msg from system
     result = ::DefWindowProc(hwnd, msg, wp, lp);
   }
 
@@ -589,6 +590,8 @@ MainWnd::VideoRenderer::VideoRenderer(
   bmi_.bmiHeader.biSizeImage =
       width * height * (bmi_.bmiHeader.biBitCount >> 3);
   rendered_track_->AddOrUpdateSink(this, rtc::VideoSinkWants());
+
+  frameCount = 0;
 }
 
 MainWnd::VideoRenderer::~VideoRenderer() {
@@ -628,6 +631,25 @@ void MainWnd::VideoRenderer::OnFrame(const webrtc::VideoFrame& video_frame) {
                        image_.get(),
                        bmi_.bmiHeader.biWidth * bmi_.bmiHeader.biBitCount / 8,
                        buffer->width(), buffer->height());
+    
+    // @chanper
+    uint8_t* rgbImage = new uint8_t[bmi_.bmiHeader.biSizeImage];
+
+    rtc::scoped_refptr<webrtc::I420BufferInterface> tempBuffer = webrtc::I420Buffer::Copy(*(buffer->GetI420()));
+    libyuv::I420ToRGB24(tempBuffer->DataY(), tempBuffer->StrideV(), tempBuffer->DataU(), 
+                        tempBuffer->StrideU(), tempBuffer->DataV(), tempBuffer->StrideV(),
+                        rgbImage, 
+                        bmi_.bmiHeader.biWidth * bmi_.bmiHeader.biBitCount / 8,
+                        tempBuffer->width(), tempBuffer->height());
+
+
+    //if (frameCount++ > 600) {
+    //  getTrack().get()->set_enabled(false);
+    //}
+
+
   }
+
+  // chanper: for each frame from downside, call invalidateRect-> WM_PAINT -> OnPaint
   InvalidateRect(wnd_, NULL, TRUE);
 }

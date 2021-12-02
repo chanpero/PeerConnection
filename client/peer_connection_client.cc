@@ -52,6 +52,8 @@ PeerConnectionClient::~PeerConnectionClient() {
 void PeerConnectionClient::InitSocketSignals() {
   RTC_DCHECK(control_socket_.get() != NULL);
   RTC_DCHECK(hanging_get_.get() != NULL);
+
+  // chanper: control socket: long connection (sign in/out), hanging_get: short connection (send/receive relay) 
   control_socket_->SignalCloseEvent.connect(this,
                                             &PeerConnectionClient::OnClose);
   hanging_get_->SignalCloseEvent.connect(this, &PeerConnectionClient::OnClose);

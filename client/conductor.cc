@@ -258,6 +258,10 @@ void Conductor::OnIceCandidate(const webrtc::IceCandidateInterface* candidate) {
 void Conductor::OnSignedIn() {
   RTC_LOG(INFO) << __FUNCTION__;
   main_wnd_->SwitchToPeerList(client_->peers());
+
+  //for loopback test
+  InitializePeerConnection();
+  ReinitializePeerConnectionForLoopback();
 }
 
 void Conductor::OnDisconnected() {
@@ -440,6 +444,7 @@ void Conductor::AddTracks() {
     return;  // Already added tracks.
   }
 
+  // @chanper: Add AudioTrack
   rtc::scoped_refptr<webrtc::AudioTrackInterface> audio_track(
       peer_connection_factory_->CreateAudioTrack(
           kAudioLabel, peer_connection_factory_->CreateAudioSource(
@@ -450,6 +455,7 @@ void Conductor::AddTracks() {
                       << result_or_error.error().message();
   }
 
+  // @chanper: Add VideoTrack
   rtc::scoped_refptr<CapturerTrackSource> video_device =
       CapturerTrackSource::Create();
   if (video_device) {

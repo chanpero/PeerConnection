@@ -121,7 +121,10 @@ class MainWnd : public MainWindow {
 
     const BITMAPINFO& bmi() const { return bmi_; }
     const uint8_t* image() const { return image_.get(); }
-
+    rtc::scoped_refptr<webrtc::VideoTrackInterface> getTrack() {
+      return rendered_track_;
+    }
+    int frameCount = 0;
    protected:
     void SetSize(int width, int height);
 
