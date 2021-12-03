@@ -631,22 +631,6 @@ void MainWnd::VideoRenderer::OnFrame(const webrtc::VideoFrame& video_frame) {
                        image_.get(),
                        bmi_.bmiHeader.biWidth * bmi_.bmiHeader.biBitCount / 8,
                        buffer->width(), buffer->height());
-    
-    // @chanper
-    uint8_t* rgbImage = new uint8_t[bmi_.bmiHeader.biSizeImage];
-
-    rtc::scoped_refptr<webrtc::I420BufferInterface> tempBuffer = webrtc::I420Buffer::Copy(*(buffer->GetI420()));
-    libyuv::I420ToRGB24(tempBuffer->DataY(), tempBuffer->StrideV(), tempBuffer->DataU(), 
-                        tempBuffer->StrideU(), tempBuffer->DataV(), tempBuffer->StrideV(),
-                        rgbImage, 
-                        bmi_.bmiHeader.biWidth * bmi_.bmiHeader.biBitCount / 8,
-                        tempBuffer->width(), tempBuffer->height());
-
-
-    //if (frameCount++ > 600) {
-    //  getTrack().get()->set_enabled(false);
-    //}
-
 
   }
 
