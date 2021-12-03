@@ -590,8 +590,6 @@ MainWnd::VideoRenderer::VideoRenderer(
   bmi_.bmiHeader.biSizeImage =
       width * height * (bmi_.bmiHeader.biBitCount >> 3);
   rendered_track_->AddOrUpdateSink(this, rtc::VideoSinkWants());
-
-  frameCount = 0;
 }
 
 MainWnd::VideoRenderer::~VideoRenderer() {
