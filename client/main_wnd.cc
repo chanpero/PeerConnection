@@ -18,6 +18,8 @@
 #include "rtc_base/checks.h"
 #include "rtc_base/logging.h"
 #include "third_party/libyuv/include/libyuv/convert_argb.h"
+#include "third_party/libyuv/include/libyuv/convert_from_argb.h"
+#include "SaveBmp.h"
 
 ATOM MainWnd::wnd_class_ = 0;
 const wchar_t MainWnd::kClassName[] = L"WebRTC_MainWnd";
@@ -621,15 +623,28 @@ void MainWnd::VideoRenderer::OnFrame(const webrtc::VideoFrame& video_frame) {
       buffer = webrtc::I420Buffer::Rotate(*buffer, video_frame.rotation());
     }
 
+  /*  chanper: 
+    bmi_.bmiHeader.biSizeImage = sizeof(img_) = width * height * (bmi_.bmiHeader.biBitCount >> 3) = 640 * 480 * 4 = 1228800 Bytes
+    column num = dst_stride_argb = width *biBitCount / 8 = 2560, row num = height = 480*/
     SetSize(buffer->width(), buffer->height());
 
     RTC_DCHECK(image_.get() != NULL);
-    libyuv::I420ToARGB(buffer->DataY(), buffer->StrideY(), buffer->DataU(),
-                       buffer->StrideU(), buffer->DataV(), buffer->StrideV(),
-                       image_.get(),
-                       bmi_.bmiHeader.biWidth * bmi_.bmiHeader.biBitCount / 8,
+    libyuv::I420ToARGB(buffer->DataY(), buffer->StrideY(), 
+                       buffer->DataU(), buffer->StrideU(), 
+                       buffer->DataV(), buffer->StrideV(),
+                       image_.get(),    bmi_.bmiHeader.biWidth * bmi_.bmiHeader.biBitCount / 8,
                        buffer->width(), buffer->height());
 
+    // chanper: I420ToRGB
+    std::unique_ptr<uint8_t[]> rgb_;
+    rgb_.reset(new uint8_t[buffer->width() * buffer->height() * 3]);
+    libyuv::I420ToRGB24(buffer->DataY(), buffer->StrideY(),
+                        buffer->DataU(), buffer->StrideU(),
+                        buffer->DataV(), buffer->StrideV(),
+                        rgb_.get(),    bmi_.bmiHeader.biWidth * 3,
+                        buffer->width(), buffer->height());
+
+    SaveDIB2Bmp(1, "D:\\", buffer->width(), buffer->height(), rgb_.get());
   }
 
   // chanper: for each frame from downside, call invalidateRect-> WM_PAINT -> OnPaint
