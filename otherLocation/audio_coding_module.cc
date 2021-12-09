@@ -92,6 +92,21 @@ class AudioCodingModuleImpl final : public AudioCodingModule {
 
   ANAStats GetANAStats() const override;
 
+  // chanper:
+  struct SavedAudioData {
+    int16_t tempBuffer[webrtc::AudioFrame::kMaxDataSizeSamples * 2];
+    int curLength = 0;
+    int counter = 0;
+
+    void reset() {
+      curLength = 0;
+      counter = 0;
+    }
+  };
+  
+  SavedAudioData savedAudioData;
+  void SaveAudioData(const AudioFrame& audio_frame);
+
  private:
   struct InputData {
     InputData() : buffer(kInitialInputDataBufferSize) {}
@@ -330,17 +345,28 @@ int AudioCodingModuleImpl::RegisterTransportCallback(
 
 // chanper: Store Audio Data
 // audio_frame.data_[only 0-159 is valid 10ms data for (1 channel, 16khz)]
-void SaveAudioData(const AudioFrame& audio_frame) {
-  FILE* file;
-  if ((file = fopen("D:\\audio.txt", "wb"))) {
-    const int16_t* buffer = audio_frame.data();
-    int length =
-        audio_frame.samples_per_channel_ * audio_frame.num_channels_; 
-    for (int i = 0; i < length; i++) {
-      fprintf(file, "%d ", buffer[i]);
+void AudioCodingModuleImpl::SaveAudioData(const AudioFrame& audio_frame) {
+  const int16_t* buffer = audio_frame.data();
+  int length = audio_frame.samples_per_channel_ * audio_frame.num_channels_; 
+
+  int curLength = savedAudioData.curLength;
+  for (int i = 0; i < length; i++)
+    savedAudioData.tempBuffer[curLength + i] = buffer[i];
+  savedAudioData.curLength += length;
+  savedAudioData.counter++;
+
+  if (savedAudioData.counter >= 30) {
+    curLength = savedAudioData.curLength;
+    FILE* file;
+    if ((file = fopen("D:\\audio.txt", "wb"))) {
+      for (int i = 0; i < curLength; i++) {
+        fprintf(file, "%d ", savedAudioData.tempBuffer[i]);
+      }
+      fclose(file);
     }
-    fclose(file);
+    savedAudioData.reset();
   }
+  
 }
 
 // Add 10MS of raw (PCM) audio data to the encoder.
