@@ -21,3 +21,5 @@ bool SaveDIB2Bmp(int fileNum,
                  int iWidth,
                  int iHeight,
                  BYTE* pBuffer);
+
+BITMAPV5HEADER ReadBmpRGB(const char* bmpName, uint8_t* dst_argb);

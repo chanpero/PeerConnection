@@ -1,12 +1,13 @@
 #include "examples/peerconnection/client/main_wnd.h"
 
+#include<iostream>
 #include <math.h>
 
 #include "api/video/i420_buffer.h"
 #include "third_party/libyuv/include/libyuv/convert_argb.h"
 #include "third_party/libyuv/include/libyuv/convert_from_argb.h"
 
-#include "SaveBmp.h"
+#include "BmpOperation.h"
 
 // @Author: chanper
 
@@ -77,4 +78,48 @@ bool SaveDIB2Bmp(int fileNum,
     return true;
   }
   return false;
+}
+
+BITMAPV5HEADER ReadBmpRGB(const char* bmpName, uint8_t* dst_argb) {
+  int bmpWidth;            //图像的宽
+  int bmpHeight;           //图像的高
+  RGBQUAD* pColorTable;    //颜色表指针
+  int biBitCount;          //图像类型，每像素位数
+
+  //定义位图信息头结构变量，读取位图信息头进内存,注意bitmapinfoheader版本
+  BITMAPFILEHEADER bitmapFileHeader;
+  BITMAPV5HEADER bitmapInfoHeader;
+
+  //二进制读方式打开指定的图像文件
+  FILE* fp = fopen(bmpName, "rb");
+  if (fp == 0)
+    return bitmapInfoHeader;
+    
+  
+  // chanper: 注意bitmapinfoheader的版本！！！
+  fread(&bitmapFileHeader, sizeof(BITMAPFILEHEADER), 1, fp);
+  fread(&bitmapInfoHeader, sizeof(BITMAPV5HEADER), 1, fp);
+
+  //获取图像宽、高、每像素所占位数等信息
+  bmpWidth = bitmapInfoHeader.bV5Width;
+  bmpHeight = bitmapInfoHeader.bV5Height;
+  biBitCount = bitmapInfoHeader.bV5BitCount;
+
+  //定义变量，计算图像每行像素所占的字节数（必须是4的倍数）
+  // int lineByte=(bmpWidth * biBitCount/8+3)/4*4;
+  int lineByte = (bmpWidth * biBitCount / 8 + 3) / 4 * 4;
+
+  //灰度图像有颜色表，且颜色表表项为256
+  if (biBitCount == 8) {
+    //申请颜色表所需要的空间，读颜色表进内存
+    pColorTable = new RGBQUAD[256];
+    fread(pColorTable, sizeof(RGBQUAD), 256, fp);
+  }
+
+  //申请位图数据所需要的空间，读位图数据进内存
+  fread(dst_argb, 1, lineByte * bmpHeight, fp);
+
+  //关闭文件
+  fclose(fp);
+  return bitmapInfoHeader;
 }
