@@ -663,8 +663,10 @@ if (is_linux || is_chromeos || is_win) {
       "peerconnection/client/defaults.h",
       "peerconnection/client/peer_connection_client.cc",
       "peerconnection/client/peer_connection_client.h",
-      "peerconnection/client/SaveBmp.h",
-      "peerconnection/client/SaveBmp.cpp",
+      "peerconnection/client/BmpOperation.h",
+      "peerconnection/client/BmpOperation.cpp",
+      "peerconnection/client/MTalk.h",
+      "peerconnection/client/MTalk.cc",
     ]
 
     deps = [
