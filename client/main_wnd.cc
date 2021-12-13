@@ -20,6 +20,7 @@
 #include "third_party/libyuv/include/libyuv/convert_argb.h"
 #include "third_party/libyuv/include/libyuv/convert_from_argb.h"
 #include "BmpOperation.h"
+#include "MTalk.h"
 
 ATOM MainWnd::wnd_class_ = 0;
 const wchar_t MainWnd::kClassName[] = L"WebRTC_MainWnd";
@@ -629,24 +630,31 @@ void MainWnd::VideoRenderer::OnFrame(const webrtc::VideoFrame& video_frame) {
     SetSize(buffer->width(), buffer->height());
 
     RTC_DCHECK(image_.get() != NULL);
-    // chanper: I420ToRGB
     libyuv::I420ToRGB24(buffer->DataY(), buffer->StrideY(), 
                        buffer->DataU(), buffer->StrideU(), 
                        buffer->DataV(), buffer->StrideV(),
                        image_.get(),    bmi_.bmiHeader.biWidth * bmi_.bmiHeader.biBitCount / 8,
                        buffer->width(), buffer->height());
 
-    SaveDIB2Bmp(1, "D:\\", buffer->width(), buffer->height(), image_.get());
+    //SaveDIB2Bmp(1, "D:\\", buffer->width(), buffer->height(), image_.get());
 
-    bool useSythetic = false;
-    if (useSythetic) {
-        // change the image direction
-      bmi_.bmiHeader.biHeight = abs(buffer->height());
-      ReadBmpRGB("D:\\RGB_Frame_3.bmp", image_.get());
-    }
+    //bool useSythetic = false;
+    //if (useSythetic) {
+    //    // change the image direction
+    //  bmi_.bmiHeader.biHeight = abs(buffer->height());
+    //  ReadBmpRGB("D:\\RGB_Frame_3.bmp", image_.get());
+    //}
 
-    //SaveDIB2Bmp(10, "D:\\", buffer->width(), buffer->height(), image_.get());
-  }
+    //MTalkSingleton* mTalk = MTalkSingleton::getInstance();
+    //mTalk->resetVideoImage(bmi_.bmiHeader.biSizeImage);
+    //mTalk->setVideoImage(image_.get(), buffer->width(), buffer->height());
+    
+
+    //image_.reset(new uint8_t[bmi_.bmiHeader.biSizeImage]);
+    //bmi_.bmiHeader.biHeight = abs(buffer->height());
+    //ReadBmpRGB("D:\\RGB_Frame_2.bmp", image_.get());
+    //mTalk->getSytheticImage(output.get(), image_.get());
+  }  
 
   // chanper: for each frame from downside, call invalidateRect-> WM_PAINT -> OnPaint
   InvalidateRect(wnd_, NULL, TRUE);
