@@ -1,5 +1,7 @@
-#include<iostream>
+#include <iostream>
+#include <cstdint>
 #include "rtc_base/logging.h"
+#include "api/audio/audio_frame.h"
 
 
 class MTalkSingleton {
@@ -9,10 +11,19 @@ class MTalkSingleton {
  private:
   static MTalkSingleton* mTalkSingleton;
 
+  // video data
   std::unique_ptr<uint8_t[]> mTalkImage;
   int width_, height_;
 
+  // audio data
+  int16_t* audioData;
+  int audioLength = -1;
+  int startIndex = -1;
+
  public:
+  static const int kMAXAUDIODATASIZE = 9600;  // 600ms for 16K sample rate
+  static const int KNEEDDATASIZE = 5119;      // Mtalk 需要的数据量
+
   static MTalkSingleton* getInstance();
 
   void print();
@@ -26,5 +37,6 @@ class MTalkSingleton {
   uint8_t* getMTalkImage(uint8_t* output);
 
   void resetAudioData();
-  void setAudioData();
+
+  void setAudioData(const webrtc::AudioFrame& audio_frame);
 };

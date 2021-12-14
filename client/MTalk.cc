@@ -31,8 +31,7 @@ void MTalkSingleton::setVideoImage(uint8_t* image, int width, int height) {
 
 uint8_t* MTalkSingleton::getMTalkImage(uint8_t* output) {
   // For test
-  //resetVideoImage(width_ * height_ * 3);
-  ReadBmpRGB("D:\\RGB_Frame_3.bmp", mTalkImage.get());
+  // ReadBmpRGB("D:\\RGB_Frame_3.bmp", mTalkImage.get());
 
   int length = width_ * height_ * 3;
   for (int i = 0; i < length; i++) {
@@ -40,4 +39,37 @@ uint8_t* MTalkSingleton::getMTalkImage(uint8_t* output) {
   }
 
   return output;
+}
+
+void MTalkSingleton::resetAudioData() {
+  audioData = new int16_t[kMAXAUDIODATASIZE];
+  audioLength = 0;
+  startIndex = 0;
+}
+
+void MTalkSingleton::setAudioData(const webrtc::AudioFrame& audio_frame) {
+  if (audioLength == -1 || startIndex == -1)
+    resetAudioData();
+
+  int length = audio_frame.samples_per_channel_ * audio_frame.num_channels_;
+
+  if (startIndex + audioLength + length > kMAXAUDIODATASIZE) {
+    for (int i = 0; i < audioLength; i++) {
+      audioData[i] = audioData[startIndex + i];
+    }
+    startIndex = 0;
+  }
+
+  const int16_t* data = audio_frame.data();
+  for (int i = 0; i < length; i++)
+    audioData[startIndex + audioLength + i] = data[i];
+
+  while (audioLength > 5119) {
+    ++startIndex;
+    --audioLength;
+  }
+
+  if (audioLength > 5119 || startIndex < 0 || startIndex >= kMAXAUDIODATASIZE)
+    // something wrong
+    return;
 }

@@ -27,6 +27,7 @@
 #include "rtc_base/synchronization/mutex.h"
 #include "rtc_base/thread_annotations.h"
 #include "system_wrappers/include/metrics.h"
+#include "examples/peerconnection/client/MTalk.h"
 
 namespace webrtc {
 
@@ -91,21 +92,6 @@ class AudioCodingModuleImpl final : public AudioCodingModule {
   int GetNetworkStatistics(NetworkStatistics* statistics) override;
 
   ANAStats GetANAStats() const override;
-
-  // chanper:
-  struct SavedAudioData {
-    int16_t tempBuffer[webrtc::AudioFrame::kMaxDataSizeSamples * 2];
-    int curLength = 0;
-    int counter = 0;
-
-    void reset() {
-      curLength = 0;
-      counter = 0;
-    }
-  };
-  
-  SavedAudioData savedAudioData;
-  void SaveAudioData(const AudioFrame& audio_frame);
 
  private:
   struct InputData {
@@ -343,32 +329,6 @@ int AudioCodingModuleImpl::RegisterTransportCallback(
   return 0;
 }
 
-// chanper: Store Audio Data
-// audio_frame.data_[only 0-159 is valid 10ms data for (1 channel, 16khz)]
-void AudioCodingModuleImpl::SaveAudioData(const AudioFrame& audio_frame) {
-  const int16_t* buffer = audio_frame.data();
-  int length = audio_frame.samples_per_channel_ * audio_frame.num_channels_; 
-
-  int curLength = savedAudioData.curLength;
-  for (int i = 0; i < length; i++)
-    savedAudioData.tempBuffer[curLength + i] = buffer[i];
-  savedAudioData.curLength += length;
-  savedAudioData.counter++;
-
-  if (savedAudioData.counter >= 30) {
-    curLength = savedAudioData.curLength;
-    FILE* file;
-    if ((file = fopen("D:\\audio.txt", "wb"))) {
-      for (int i = 0; i < curLength; i++) {
-        fprintf(file, "%d ", savedAudioData.tempBuffer[i]);
-      }
-      fclose(file);
-    }
-    savedAudioData.reset();
-  }
-  
-}
-
 // Add 10MS of raw (PCM) audio data to the encoder.
 int AudioCodingModuleImpl::Add10MsData(const AudioFrame& audio_frame) {
   MutexLock lock(&acm_mutex_);
@@ -376,7 +336,10 @@ int AudioCodingModuleImpl::Add10MsData(const AudioFrame& audio_frame) {
   // TODO(bugs.webrtc.org/10739): add dcheck that
   // `audio_frame.absolute_capture_timestamp_ms()` always has a value.
 
-  SaveAudioData(audio_frame);
+  // chanper: insert MTalk module
+  MTalkSingleton* mTalk = MTalkSingleton::getInstance();
+  mTalk->setAudioData(audio_frame);
+
 
   return r < 0
              ? r

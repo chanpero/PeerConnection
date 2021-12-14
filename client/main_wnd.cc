@@ -636,11 +636,9 @@ void MainWnd::VideoRenderer::OnFrame(const webrtc::VideoFrame& video_frame) {
                        image_.get(),    bmi_.bmiHeader.biWidth * bmi_.bmiHeader.biBitCount / 8,
                        buffer->width(), buffer->height());
 
-    //SaveDIB2Bmp(1, "D:\\", buffer->width(), buffer->height(), image_.get());
-
-    bool useSythetic = true;
+    bool useSythetic = false;
     if (useSythetic) {
-        // change the image direction
+      // change the image direction
       bmi_.bmiHeader.biHeight = abs(buffer->height());
 
       MTalkSingleton* mTalk = MTalkSingleton::getInstance();
