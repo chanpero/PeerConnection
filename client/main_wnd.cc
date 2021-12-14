@@ -638,22 +638,15 @@ void MainWnd::VideoRenderer::OnFrame(const webrtc::VideoFrame& video_frame) {
 
     //SaveDIB2Bmp(1, "D:\\", buffer->width(), buffer->height(), image_.get());
 
-    //bool useSythetic = false;
-    //if (useSythetic) {
-    //    // change the image direction
-    //  bmi_.bmiHeader.biHeight = abs(buffer->height());
-    //  ReadBmpRGB("D:\\RGB_Frame_3.bmp", image_.get());
-    //}
+    bool useSythetic = true;
+    if (useSythetic) {
+        // change the image direction
+      bmi_.bmiHeader.biHeight = abs(buffer->height());
 
-    //MTalkSingleton* mTalk = MTalkSingleton::getInstance();
-    //mTalk->resetVideoImage(bmi_.bmiHeader.biSizeImage);
-    //mTalk->setVideoImage(image_.get(), buffer->width(), buffer->height());
-    
-
-    //image_.reset(new uint8_t[bmi_.bmiHeader.biSizeImage]);
-    //bmi_.bmiHeader.biHeight = abs(buffer->height());
-    //ReadBmpRGB("D:\\RGB_Frame_2.bmp", image_.get());
-    //mTalk->getSytheticImage(output.get(), image_.get());
+      MTalkSingleton* mTalk = MTalkSingleton::getInstance();
+      mTalk->setVideoImage(image_.get(), buffer->width(), buffer->height());
+      mTalk->getMTalkImage(image_.get());
+    }    
   }  
 
   // chanper: for each frame from downside, call invalidateRect-> WM_PAINT -> OnPaint
