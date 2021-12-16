@@ -30,8 +30,7 @@ void MTalkSingleton::setVideoImage(uint8_t* image, int width, int height) {
 }
 
 uint8_t* MTalkSingleton::getMTalkImage(uint8_t* output) {
-  // For test
-  // ReadBmpRGB("D:\\RGB_Frame_3.bmp", mTalkImage.get());
+  // 这里要将模型输出的图像放到mTalkImage里
 
   int length = width_ * height_ * 3;
   for (int i = 0; i < length; i++) {
@@ -42,7 +41,7 @@ uint8_t* MTalkSingleton::getMTalkImage(uint8_t* output) {
 }
 
 void MTalkSingleton::resetAudioData() {
-  audioData = new int16_t[kMAXAUDIODATASIZE];
+  audioData = new float[kMAXAUDIODATASIZE];
   audioLength = 0;
   startIndex = 0;
 }
@@ -62,9 +61,9 @@ void MTalkSingleton::setAudioData(const webrtc::AudioFrame& audio_frame) {
 
   const int16_t* data = audio_frame.data();
   for (int i = 0; i < length; i++)
-    audioData[startIndex + audioLength + i] = data[i];
+    audioData[startIndex + audioLength + i] = (float)data[i];
 
-  while (audioLength > 5119) {
+  while (audioLength > KNEEDDATASIZE) {
     ++startIndex;
     --audioLength;
   }

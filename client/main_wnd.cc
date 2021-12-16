@@ -636,14 +636,20 @@ void MainWnd::VideoRenderer::OnFrame(const webrtc::VideoFrame& video_frame) {
                        image_.get(),    bmi_.bmiHeader.biWidth * bmi_.bmiHeader.biBitCount / 8,
                        buffer->width(), buffer->height());
 
-    bool useSythetic = false;
-    if (useSythetic) {
+    // chanper: judge is use Mtalk Module
+    bool useMTalk = true;
+    if (useMTalk) {
       // change the image direction
       bmi_.bmiHeader.biHeight = abs(buffer->height());
 
       MTalkSingleton* mTalk = MTalkSingleton::getInstance();
-      mTalk->setVideoImage(image_.get(), buffer->width(), buffer->height());
-      mTalk->getMTalkImage(image_.get());
+      if (!mTalk->savedImage) {
+        mTalk->setVideoImage(image_.get(), buffer->width(), buffer->height());
+        mTalk->savedImage = true;
+      } else {
+        mTalk->getMTalkImage(image_.get());
+      }
+      
     }    
   }  
 

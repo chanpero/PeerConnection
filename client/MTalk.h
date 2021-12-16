@@ -16,7 +16,7 @@ class MTalkSingleton {
   int width_, height_;
 
   // audio data
-  int16_t* audioData;
+  float_t* audioData;
   int audioLength = -1;
   int startIndex = -1;
 
@@ -26,6 +26,9 @@ class MTalkSingleton {
 
   static MTalkSingleton* getInstance();
 
+  bool savedImage = false;
+
+  // for test
   void print();
 
   void resetVideoImage(unsigned long imageSize);
