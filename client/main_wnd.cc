@@ -644,7 +644,7 @@ void MainWnd::VideoRenderer::OnFrame(const webrtc::VideoFrame& video_frame) {
 
       MTalkSingleton* mTalk = MTalkSingleton::getInstance();
       if (!mTalk->savedImage) {
-        mTalk->setVideoImage(image_.get(), buffer->width(), buffer->height());
+        mTalk->setReferenceImage(image_.get(), buffer->width(), buffer->height());
         mTalk->savedImage = true;
       } else {
         mTalk->getMTalkImage(image_.get());
