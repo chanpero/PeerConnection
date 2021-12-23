@@ -65,15 +65,14 @@ void MTalkSingleton::setAudioData(const webrtc::AudioFrame& audio_frame) {
   }
 
   const int16_t* data = audio_frame.data();
-  for (int i = 0; i < length; i++)
-    audioData[startIndex + audioLength + i] = (float)data[i];
+  for (int i = 0; i < length; i++) {
+    audioData[startIndex + audioLength + i] = (float)data[i] / 32768.0;
+  }
+  audioLength += length;
 
-  while (audioLength > KNEEDDATASIZE) {
+  // audioData里面最新的数据始终是audioData[startIndex...startIndex+audioLength]，且长度为kNeedDataSize
+  while (audioLength > kNEEDDATASIZE) {
     ++startIndex;
     --audioLength;
   }
-
-  if (audioLength > 5119 || startIndex < 0 || startIndex >= kMAXAUDIODATASIZE)
-    // something wrong
-    return;
 }

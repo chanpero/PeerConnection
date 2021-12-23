@@ -22,8 +22,10 @@ class MTalkSingleton {
   int startIndex = -1;
 
  public:
-  static const int kMAXAUDIODATASIZE = 9600;  // 600ms for 16K sample rate
-  static const int KNEEDDATASIZE = 5119;      // Mtalk 需要的数据量
+  static const int kMAXAUDIODATASIZE = 30000;  // 600ms for 16K sample rate
+  int kNEEDDATASIZE = 25599;      // Mtalk 需要的数据量,第一次拿完后改完5119
+
+  //int kFIRSTAUDIOSIZE = 25599;
 
   static MTalkSingleton* getInstance();
 
