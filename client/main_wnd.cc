@@ -213,7 +213,7 @@ void MainWnd::MessageBox(const char* caption, const char* text, bool is_error) {
 }
 
 void MainWnd::StartLocalRenderer(webrtc::VideoTrackInterface* local_video) {
-  local_renderer_.reset(new VideoRenderer(handle(), 1, 1, local_video));
+  local_renderer_.reset(new LocalVideoRenderer(handle(), 1, 1, local_video));
 }
 
 void MainWnd::StopLocalRenderer() {
@@ -221,7 +221,7 @@ void MainWnd::StopLocalRenderer() {
 }
 
 void MainWnd::StartRemoteRenderer(webrtc::VideoTrackInterface* remote_video) {
-  remote_renderer_.reset(new VideoRenderer(handle(), 1, 1, remote_video));
+  remote_renderer_.reset(new RemoteVideoRenderer(handle(), 1, 1, remote_video));
 }
 
 void MainWnd::StopRemoteRenderer() {
@@ -241,11 +241,11 @@ void MainWnd::OnPaint() {
   RECT rc;
   ::GetClientRect(handle(), &rc);
 
-  VideoRenderer* local_renderer = local_renderer_.get();
-  VideoRenderer* remote_renderer = remote_renderer_.get();
+  LocalVideoRenderer* local_renderer = local_renderer_.get();
+  RemoteVideoRenderer* remote_renderer = remote_renderer_.get();
   if (ui_ == STREAMING && remote_renderer && local_renderer) {
-    AutoLock<VideoRenderer> local_lock(local_renderer);
-    AutoLock<VideoRenderer> remote_lock(remote_renderer);
+    AutoLock<LocalVideoRenderer> local_lock(local_renderer);
+    AutoLock<RemoteVideoRenderer> remote_lock(remote_renderer);
 
     const BITMAPINFO& bmi = remote_renderer->bmi();
     int height = abs(bmi.bmiHeader.biHeight);
@@ -576,7 +576,91 @@ void MainWnd::HandleTabbing() {
 // MainWnd::VideoRenderer
 //
 
-MainWnd::VideoRenderer::VideoRenderer(
+//MainWnd::VideoRenderer::VideoRenderer(
+//    HWND wnd,
+//    int width,
+//    int height,
+//    webrtc::VideoTrackInterface* track_to_render)
+//    : wnd_(wnd), rendered_track_(track_to_render) {
+//  ::InitializeCriticalSection(&buffer_lock_);
+//  ZeroMemory(&bmi_, sizeof(bmi_));
+//  bmi_.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+//  bmi_.bmiHeader.biPlanes = 1;
+//  bmi_.bmiHeader.biBitCount = 24;
+//  bmi_.bmiHeader.biCompression = BI_RGB;
+//  bmi_.bmiHeader.biWidth = width;
+//  bmi_.bmiHeader.biHeight = -height;
+//  bmi_.bmiHeader.biSizeImage =
+//      width * height * (bmi_.bmiHeader.biBitCount >> 3);
+//  rendered_track_->AddOrUpdateSink(this, rtc::VideoSinkWants());
+//}
+//
+//MainWnd::VideoRenderer::~VideoRenderer() {
+//  rendered_track_->RemoveSink(this);
+//  ::DeleteCriticalSection(&buffer_lock_);
+//}
+//
+//void MainWnd::VideoRenderer::SetSize(int width, int height) {
+//  AutoLock<VideoRenderer> lock(this);
+//
+//  if (width == bmi_.bmiHeader.biWidth && height == bmi_.bmiHeader.biHeight) {
+//    return;
+//  }
+//
+//  bmi_.bmiHeader.biWidth = width;
+//  bmi_.bmiHeader.biHeight = -height;
+//  bmi_.bmiHeader.biSizeImage =
+//      width * height * (bmi_.bmiHeader.biBitCount >> 3);
+//  image_.reset(new uint8_t[bmi_.bmiHeader.biSizeImage]);
+//}
+//
+//void MainWnd::VideoRenderer::OnFrame(const webrtc::VideoFrame& video_frame) {
+//  {
+//    AutoLock<VideoRenderer> lock(this);
+//
+//    rtc::scoped_refptr<webrtc::I420BufferInterface> buffer(
+//        video_frame.video_frame_buffer()->ToI420());
+//    if (video_frame.rotation() != webrtc::kVideoRotation_0) {
+//      buffer = webrtc::I420Buffer::Rotate(*buffer, video_frame.rotation());
+//    }
+//
+//    SetSize(buffer->width(), buffer->height());
+//
+//    RTC_DCHECK(image_.get() != NULL);
+//    libyuv::I420ToRGB24(buffer->DataY(), buffer->StrideY(), buffer->DataU(),
+//                        buffer->StrideU(), buffer->DataV(), buffer->StrideV(),
+//                        image_.get(),
+//                        bmi_.bmiHeader.biWidth * bmi_.bmiHeader.biBitCount / 8,
+//                        buffer->width(), buffer->height());
+//
+//    // chanper: judge is use Mtalk Module
+//    bool useMTalk = true;
+//    if (useMTalk) {
+//      // change the image direction
+//      bmi_.bmiHeader.biHeight = abs(buffer->height());
+//
+//      MTalkSingleton* mTalk = MTalkSingleton::getInstance();
+//      if (mTalk->savedImage == 100) {
+//        mTalk->setReferenceImage(image_.get(), buffer->width(),
+//                                 buffer->height());
+//
+//      } else if (mTalk->savedImage > 100) {
+//        mTalk->getMTalkImage(image_.get());
+//      }
+//      mTalk->savedImage++;
+//    }
+//  }
+//
+//  // chanper: for each frame from downside, call invalidateRect-> WM_PAINT ->
+//  // OnPaint
+//  InvalidateRect(wnd_, NULL, TRUE);
+//}
+
+
+//
+// MainWnd::LocalVideoRenderer
+//
+MainWnd::LocalVideoRenderer::LocalVideoRenderer(
     HWND wnd,
     int width,
     int height,
@@ -595,13 +679,13 @@ MainWnd::VideoRenderer::VideoRenderer(
   rendered_track_->AddOrUpdateSink(this, rtc::VideoSinkWants());
 }
 
-MainWnd::VideoRenderer::~VideoRenderer() {
+MainWnd::LocalVideoRenderer::~LocalVideoRenderer() {
   rendered_track_->RemoveSink(this);
   ::DeleteCriticalSection(&buffer_lock_);
 }
 
-void MainWnd::VideoRenderer::SetSize(int width, int height) {
-  AutoLock<VideoRenderer> lock(this);
+void MainWnd::LocalVideoRenderer::SetSize(int width, int height) {
+  AutoLock<LocalVideoRenderer> lock(this);
 
   if (width == bmi_.bmiHeader.biWidth && height == bmi_.bmiHeader.biHeight) {
     return;
@@ -614,9 +698,94 @@ void MainWnd::VideoRenderer::SetSize(int width, int height) {
   image_.reset(new uint8_t[bmi_.bmiHeader.biSizeImage]);
 }
 
-void MainWnd::VideoRenderer::OnFrame(const webrtc::VideoFrame& video_frame) {
+void MainWnd::LocalVideoRenderer::OnFrame(const webrtc::VideoFrame& video_frame) {
   {
-    AutoLock<VideoRenderer> lock(this);
+    AutoLock<LocalVideoRenderer> lock(this);
+
+    rtc::scoped_refptr<webrtc::I420BufferInterface> buffer(
+        video_frame.video_frame_buffer()->ToI420());
+    if (video_frame.rotation() != webrtc::kVideoRotation_0) {
+      buffer = webrtc::I420Buffer::Rotate(*buffer, video_frame.rotation());
+    }
+
+    SetSize(buffer->width(), buffer->height());
+
+    RTC_DCHECK(image_.get() != NULL);
+    libyuv::I420ToRGB24(buffer->DataY(), buffer->StrideY(), buffer->DataU(),
+                        buffer->StrideU(), buffer->DataV(), buffer->StrideV(),
+                        image_.get(),
+                        bmi_.bmiHeader.biWidth * bmi_.bmiHeader.biBitCount / 8,
+                        buffer->width(), buffer->height());
+
+    // chanper: judge is use Mtalk Module
+    bool useMTalk = false;
+    if (useMTalk) {
+      // change the image direction
+      bmi_.bmiHeader.biHeight = abs(buffer->height());
+
+      MTalkSingleton* mTalk = MTalkSingleton::getInstance();
+      if (mTalk->savedImage == 100) {
+        mTalk->setReferenceImage(image_.get(), buffer->width(),
+                                 buffer->height());
+
+      } else if (mTalk->savedImage > 100) {
+        mTalk->getMTalkImage(image_.get());
+      }
+      mTalk->savedImage++;
+    }
+  }
+
+  // chanper: for each frame from downside, call invalidateRect-> WM_PAINT ->
+  // OnPaint
+  InvalidateRect(wnd_, NULL, TRUE);
+}
+
+
+//
+// MainWnd::RemoteVideoRenderer
+//
+MainWnd::RemoteVideoRenderer::RemoteVideoRenderer(
+    HWND wnd,
+    int width,
+    int height,
+    webrtc::VideoTrackInterface* track_to_render)
+    : wnd_(wnd), rendered_track_(track_to_render) {
+  ::InitializeCriticalSection(&buffer_lock_);
+  ZeroMemory(&bmi_, sizeof(bmi_));
+  bmi_.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+  bmi_.bmiHeader.biPlanes = 1;
+  bmi_.bmiHeader.biBitCount = 24;
+  bmi_.bmiHeader.biCompression = BI_RGB;
+  bmi_.bmiHeader.biWidth = width;
+  bmi_.bmiHeader.biHeight = -height;
+  bmi_.bmiHeader.biSizeImage =
+      width * height * (bmi_.bmiHeader.biBitCount >> 3);
+  rendered_track_->AddOrUpdateSink(this, rtc::VideoSinkWants());
+}
+
+MainWnd::RemoteVideoRenderer::~RemoteVideoRenderer() {
+  rendered_track_->RemoveSink(this);
+  ::DeleteCriticalSection(&buffer_lock_);
+}
+
+void MainWnd::RemoteVideoRenderer::SetSize(int width, int height) {
+  AutoLock<RemoteVideoRenderer> lock(this);
+
+  if (width == bmi_.bmiHeader.biWidth && height == bmi_.bmiHeader.biHeight) {
+    return;
+  }
+
+  bmi_.bmiHeader.biWidth = width;
+  bmi_.bmiHeader.biHeight = -height;
+  bmi_.bmiHeader.biSizeImage =
+      width * height * (bmi_.bmiHeader.biBitCount >> 3);
+  image_.reset(new uint8_t[bmi_.bmiHeader.biSizeImage]);
+}
+
+void MainWnd::RemoteVideoRenderer::OnFrame(
+    const webrtc::VideoFrame& video_frame) {
+  {
+    AutoLock<RemoteVideoRenderer> lock(this);
 
     rtc::scoped_refptr<webrtc::I420BufferInterface> buffer(
         video_frame.video_frame_buffer()->ToI420());
