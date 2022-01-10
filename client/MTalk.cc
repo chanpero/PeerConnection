@@ -50,6 +50,7 @@ uint8_t* MTalkSingleton::getMTalkImage(uint8_t* output) {
   unsigned char* fake_image = ct.ctalk_process();
 
   mTalkImage.reset(fake_image);
+  SaveDIB2Bmp(1, "D:\\", 640, 480, fake_image);
 
   int length = width_ * height_ * 3;
   for (int i = 0; i < length; i++) {
@@ -73,20 +74,21 @@ void MTalkSingleton::setAudioData(const webrtc::AudioFrame& audio_frame) {
 
   int length = audio_frame.samples_per_channel_ * audio_frame.num_channels_;
 
-  if (startIndex + audioLength + length > kMAXAUDIODATASIZE) {
-    for (int i = 0; i < audioLength; i++) {
-      audioData[i] = audioData[startIndex + i];
-    }
-    startIndex = 0;
-  }
+  //if (startIndex + audioLength + length > kMAXAUDIODATASIZE) {
+  //  for (int i = 0; i < audioLength; i++) {
+  //    audioData[i] = audioData[startIndex + i];
+  //  }
+  //  startIndex = 0;
+  //}
 
   const int16_t* data = audio_frame.data();
   for (int i = 0; i < length; i++) {
-    audioData[startIndex + audioLength + i] = (float)data[i] / 32768.0;
+    int indexToPut = (startIndex + audioLength + i) % kMAXAUDIODATASIZE;
+    audioData[indexToPut] = (float)data[i] / 32768.0;
   }
-  audioLength += length;
 
-  while (audioLength > kNEEDDATASIZE) {
+  audioLength += length;
+  while (audioLength > kMAXAUDIODATASIZE) {
     ++startIndex;
     --audioLength;
   }
