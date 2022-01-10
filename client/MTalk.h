@@ -3,7 +3,6 @@
 #include "rtc_base/logging.h"
 #include "api/audio/audio_frame.h"
 
-
 class MTalkSingleton {
  protected:
   MTalkSingleton() {}
@@ -21,15 +20,15 @@ class MTalkSingleton {
   int audioLength = -1;
   int startIndex = -1;
 
+  //py
+
  public:
   static const int kMAXAUDIODATASIZE = 30000;  // 600ms for 16K sample rate
-  int kNEEDDATASIZE = 25599;      // Mtalk 需要的数据量,第一次拿完后改完5119
-
-  //int kFIRSTAUDIOSIZE = 25599;
+  int kNEEDDATASIZE = 25599;     // Mtalk 需要的数据量
 
   static MTalkSingleton* getInstance();
 
-  bool savedImage = false;
+  int savedImage = 0;
 
   // for test
   void print();
