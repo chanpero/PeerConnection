@@ -39,9 +39,7 @@
   // 读入初始参考图像，实例化类的对象
   // 图像需要(unsigned char) * height * width * 3, 一维数组即可。
   // 返回python类对应的实例
-  void Ctalk::init_ctalk(uint8_t* data,  // height * width * 3
-                         int width,
-                         int height) {
+  void Ctalk::init_ctalk(uint8_t* data, int width, int height) {
     npy_intp Dims[3] = {height, width, 3};
     PyObject* pArray = PyArray_SimpleNewFromData(3, Dims, NPY_UBYTE, data);
     PyObject* ArgArray = PyTuple_New(1);
@@ -52,10 +50,7 @@
 
   // 向实例中载入参考图像
   // 图像需要(unsigned char) * height * width * 3, 一维数组即可。
-  bool Ctalk::load_reference(  // python类对应的实例
-      uint8_t* data,           // 图像
-      int width,               //图像的宽
-      int height) {            // 图像的高
+  bool Ctalk::load_reference(uint8_t* data, int width, int height) {
     npy_intp Dims[3] = {height, width, 3};
     PyObject* pArray = PyArray_SimpleNewFromData(3, Dims, NPY_UBYTE, data);
     PyObject* ArgArray = PyTuple_New(1);
@@ -63,34 +58,26 @@
     PyObject* Result =
         PyObject_CallMethod(pInstance, "load_reference", "O", pArray);
 
-    /*Py_DECREF(pArray);
-    Py_DECREF(ArgArray);*/
     if (Result == NULL) {
       return false;
     }
-    // Py_DECREF(Result);
+
     return true;
   }
 
   // 向实例中载入音频
-  // lth
-  // 初次需设置成25599，对应的步长为20992（82×256，256为一帧，第一次需要较多的帧）
-  // lth
+  // lth初次需设置成25599，对应的步长为20992（82×256，256为一帧，第一次需要较多的帧）
   // 后续设置成5119，对应的步长为512（2×256，256为一帧，即每次跳跃两帧，每次处理20帧：窗口18+帧2）
   bool Ctalk::load_audio(float* data, int lth) {
     npy_intp Dims[1] = {lth};
     PyObject* pArray = PyArray_SimpleNewFromData(1, Dims, NPY_FLOAT32, data);
-    /*PyObject* ArgArray = PyTuple_New(1);
-    PyTuple_SetItem(ArgArray, 0, pArray);*/
     PyObject* pResult =
         PyObject_CallMethod(pInstance, "load_audio", "Oi", pArray, 16000);
-
-    // Py_DECREF(pArray);
-    // Py_DECREF(ArgArray);
+    
     if (pResult == NULL) {
       return false;
     }
-    // Py_DECREF(pResult);
+
     return true;
   }
 
@@ -104,21 +91,20 @@
         PyObject_CallMethod(pInstance, "landmark2image", nullptr);
     assert(pResult2 != NULL);
 
-    uint8_t* fake_image = (uint8_t*)malloc(sizeof(uint8_t) * 480 * 640 *
-                                           3);  //返回的图像大小为480×640
+    uint8_t* fake_image = (uint8_t*)malloc(sizeof(uint8_t) * 640 * 480 * 3);  //返回的图像大小为640×480
     PyArrayObject* fake_image_array;
     PyArray_OutputConverter(pResult2, &fake_image_array);
+    int t = 0;
     for (int i = 0; i < 480; i++) {
       for (int j = 0; j < 640; j++) {
         uint8_t b = *(uint8_t*)PyArray_GETPTR3(fake_image_array, i, j, 0);
         uint8_t g = *(uint8_t*)PyArray_GETPTR3(fake_image_array, i, j, 1);
         uint8_t r = *(uint8_t*)PyArray_GETPTR3(fake_image_array, i, j, 2);
-        fake_image[i + j * 480 + 0] = b;
-        fake_image[i + j * 480 + 1] = g;
-        fake_image[i + j * 480 + 2] = r;
+        fake_image[t++] = b;
+        fake_image[t++] = g;
+        fake_image[t++] = r;
       }
     }
 
-    // PyArg_Parse(pResult2, "O", &fake_image_array);
     return fake_image;
   }
