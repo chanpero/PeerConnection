@@ -218,7 +218,7 @@ void Conductor::OnAddTrack(
         streams) {
   RTC_LOG(INFO) << __FUNCTION__ << " " << receiver->id();
   main_wnd_->QueueUIThreadCallback(NEW_TRACK_ADDED,
-                                   receiver->track().release());
+                                   receiver->track().release());  
 }
 
 void Conductor::OnRemoveTrack(
@@ -259,7 +259,7 @@ void Conductor::OnSignedIn() {
   RTC_LOG(INFO) << __FUNCTION__;
   main_wnd_->SwitchToPeerList(client_->peers());
 
-  //for loopback test
+  // for loopback test
   InitializePeerConnection();
   ReinitializePeerConnectionForLoopback();
 }
@@ -471,7 +471,7 @@ void Conductor::AddTracks() {
   } else {
     RTC_LOG(LS_ERROR) << "OpenVideoCaptureDevice failed";
   }
-
+  
   main_wnd_->SwitchToStreamingUI();
 }
 

@@ -22,6 +22,7 @@
 #include "examples/peerconnection/client/main_wnd.h"
 #include "examples/peerconnection/client/peer_connection_client.h"
 #include "rtc_base/thread.h"
+#include "api/stats/rtc_stats_collector_callback.h"
 
 namespace webrtc {
 class VideoCaptureModule;
@@ -30,6 +31,7 @@ class VideoCaptureModule;
 namespace cricket {
 class VideoRenderer;
 }  // namespace cricket
+
 
 class Conductor : public webrtc::PeerConnectionObserver,
                   public webrtc::CreateSessionDescriptionObserver,

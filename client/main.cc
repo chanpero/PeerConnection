@@ -70,55 +70,7 @@ WindowsCommandLineArguments::WindowsCommandLineArguments() {
   }
   LocalFree(wide_argv);
 }
-//
-//// 初始化python文件，声明其中的类
-//// 返回python类
-//PyObject* ctalk() {
-//  Py_SetPythonHome((wchar_t*)(L"E:\\tools\\anaconda\\anaconda\\envs\\mtalk"));
-//  Py_Initialize();
-//  import_array();
-//
-//  PyRun_SimpleString("import sys");
-//  PyRun_SimpleString("sys.path.append('E:\\project\\makeittalk\\MakeItTalk')");
-//
-//  PyObject* pName = PyUnicode_FromString("interfacer");
-//  PyObject* pModule = PyImport_Import(pName);
-//  if (!pModule) {
-//    printf("Module load error !");
-//    exit(0);
-//  }
-//
-//  PyObject* pDict = PyModule_GetDict(pModule);
-//  if (pDict == NULL) {
-//    printf("Can't find the dictionary!");
-//    exit(0);
-//  }
-//
-//  PyObject* pClass = PyDict_GetItemString(pDict, "Interfacer");
-//  if (pClass == NULL) {
-//    printf("Can't find class!");
-//    exit(0);
-//  }
-//  return pClass;
-//}
-//
-//// 读入初始参考图像，实例化类的对象
-//// 图像需要(unsigned char) * height * width * 3, 一维数组即可。
-//// 返回python类对应的实例
-//PyObject* init_ctalk(PyObject* pClass,
-//                     unsigned char* data,  // height * width * 3
-//                     int width,
-//                     int height) {
-//  npy_intp Dims[3] = {height, width, 3};
-//  PyObject* pArray = PyArray_SimpleNewFromData(3, Dims, NPY_UBYTE, data);
-//  PyObject* ArgArray = PyTuple_New(1);
-//  PyTuple_SetItem(ArgArray, 0, pArray);
-//  PyObject* pInstance = PyObject_CallObject(pClass, ArgArray);
-//  assert(pInstance != NULL);
-//  /*Py_DECREF(pArray);
-//  Py_DECREF(ArgArray);*/
-//  return pInstance;
-//}
+
 
 
 }  // namespace
@@ -135,38 +87,6 @@ int PASCAL wWinMain(HINSTANCE instance,
   char** argv = win_args.argv();
 
   absl::ParseCommandLine(argc, argv);
-
-  // PyObject* pClass1 = ctalk();
-
-  //unsigned char* referenceImage =
-  //    (uint8_t*)malloc(sizeof(unsigned char) * 256 * 256 * 3);
-  //int num = 0;
-  //for (int i = 0; i < 256; i++) {
-  //  for (int j = 0; j < 256; j++) {
-  //    referenceImage[num] = i + j;
-  //    num++;
-  //    referenceImage[num] = i + j + 2;
-  //    num++;
-  //    referenceImage[num] = i + j + 1;
-  //    num++;
-  //  }
-  //}
-  //
-  //PyObject* pClass = ctalk();
-  //PyObject* pInstance = init_ctalk(pClass, referenceImage, 256, 256);
-
-  ///*npy_intp Dims[3] = {256, 256, 3};
-  //PyObject* pArray =
-  //    PyArray_SimpleNewFromData(3, Dims, NPY_UBYTE, referenceImage);
-  //assert(pArray != NULL);
-  //PyObject* ArgArray = PyTuple_New(1);
-  //PyTuple_SetItem(ArgArray, 0, pArray);
-  //PyObject* pInstance = PyObject_CallObject(pClass, ArgArray);*/
-
-  //assert(pInstance != NULL);
-  //PyObject* pResult =
-  //    PyObject_CallMethod(pInstance, "load_audio", NULL);
-  //assert(pResult != NULL);
 
   // InitFieldTrialsFromString stores the char*, so the char array must outlive
   // the application.

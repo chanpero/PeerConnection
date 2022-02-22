@@ -612,7 +612,8 @@ void MainWnd::LocalVideoRenderer::SetSize(int width, int height) {
   image_.reset(new uint8_t[bmi_.bmiHeader.biSizeImage]);
 }
 
-void MainWnd::LocalVideoRenderer::OnFrame(const webrtc::VideoFrame& video_frame) {
+void MainWnd::LocalVideoRenderer::OnFrame(
+    const webrtc::VideoFrame& video_frame) {
   {
     AutoLock<LocalVideoRenderer> lock(this);
 
@@ -630,10 +631,11 @@ void MainWnd::LocalVideoRenderer::OnFrame(const webrtc::VideoFrame& video_frame)
                         image_.get(),
                         bmi_.bmiHeader.biWidth * bmi_.bmiHeader.biBitCount / 8,
                         buffer->width(), buffer->height());
-  }
 
-  // chanper: for each frame from downside, call invalidateRect-> WM_PAINT -> OnPaint
-  InvalidateRect(wnd_, NULL, TRUE);
+    // chanper: for each frame from downside, call invalidateRect-> WM_PAINT ->
+    // OnPaint
+    InvalidateRect(wnd_, NULL, TRUE);
+  }
 }
 
 
@@ -699,9 +701,10 @@ void MainWnd::RemoteVideoRenderer::OnFrame(
                         buffer->width(), buffer->height());
 
     // chanper: judge is use Mtalk Module
-    bool useMTalk = true;
-    if (useMTalk) {
+    bool useMTalk = false;
 
+    if (useMTalk) 
+    {
       MTalkSingleton* mTalk = MTalkSingleton::getInstance();
       if (mTalk->savedImage == 100) {
         mTalk->setReferenceImage(image_.get(), buffer->width(),
