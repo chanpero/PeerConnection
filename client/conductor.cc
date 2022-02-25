@@ -218,7 +218,10 @@ void Conductor::OnAddTrack(
         streams) {
   RTC_LOG(INFO) << __FUNCTION__ << " " << receiver->id();
   main_wnd_->QueueUIThreadCallback(NEW_TRACK_ADDED,
-                                   receiver->track().release());  
+                                   receiver->track().release()); 
+
+  //rtc::scoped_refptr<MyRTCStatsCollectorCallback> stasRefpt = new rtc::RefCountedObject<MyRTCStatsCollectorCallback>();
+  //peer_connection_->GetStats(stasRefpt);
 }
 
 void Conductor::OnRemoveTrack(
