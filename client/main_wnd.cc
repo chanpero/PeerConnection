@@ -299,6 +299,9 @@ void MainWnd::OnPaint() {
       ::SelectObject(dc_mem, bmp_old);
       ::DeleteObject(bmp_mem);
       ::DeleteDC(dc_mem);
+
+       rtc::scoped_refptr<MyRTCStatsCollectorCallback> stasRefpt = new rtc::RefCountedObject<MyRTCStatsCollectorCallback>();
+       pc_->GetStats(stasRefpt);
     } else {
       // We're still waiting for the video stream to be initialized.
       HBRUSH brush = ::CreateSolidBrush(RGB(0, 0, 0));

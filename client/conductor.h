@@ -32,13 +32,13 @@ namespace cricket {
 class VideoRenderer;
 }  // namespace cricket
 
-class MyRTCStatsCollectorCallback : virtual public webrtc::RTCStatsCollectorCallback {
- public:
-  void OnStatsDelivered(const rtc::scoped_refptr<const webrtc::RTCStatsReport>& report) {
-    std::string json = report->ToJson();
-    RTC_LOG(INFO) << __FUNCTION__ << ": " << json;
-  }
-};
+//class MyRTCStatsCollectorCallback : virtual public webrtc::RTCStatsCollectorCallback {
+// public:
+//  void OnStatsDelivered(const rtc::scoped_refptr<const webrtc::RTCStatsReport>& report) {
+//    std::string json = report->ToJson();
+//    RTC_LOG(INFO) << __FUNCTION__ << ": " << json;
+//  }
+//};
 
 class Conductor : public webrtc::PeerConnectionObserver,
                   public webrtc::CreateSessionDescriptionObserver,

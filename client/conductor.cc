@@ -156,7 +156,7 @@ bool Conductor::InitializePeerConnection() {
   }
 
   AddTracks();
-
+  main_wnd_->pc_ = peer_connection_;
   return peer_connection_ != nullptr;
 }
 

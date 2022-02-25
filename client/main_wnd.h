@@ -22,6 +22,8 @@
 #include "media/base/video_common.h"
 #if defined(WEBRTC_WIN)
 #include "rtc_base/win32.h"
+#include "api/peer_connection_interface.h"
+
 #endif  // WEBRTC_WIN
 
 class MainWndCallback {
@@ -37,9 +39,20 @@ class MainWndCallback {
   virtual ~MainWndCallback() {}
 };
 
+class MyRTCStatsCollectorCallback
+    : virtual public webrtc::RTCStatsCollectorCallback {
+ public:
+  void OnStatsDelivered(
+      const rtc::scoped_refptr<const webrtc::RTCStatsReport>& report) {
+    std::string json = report->ToJson();
+    RTC_LOG(INFO) << __FUNCTION__ << ": " << json;
+  }
+};
+
 // Pure virtual interface for the main window.
 class MainWindow {
  public:
+  rtc::scoped_refptr<webrtc::PeerConnectionInterface> pc_;
   virtual ~MainWindow() {}
 
   enum UI {
