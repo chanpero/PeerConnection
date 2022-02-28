@@ -300,8 +300,15 @@ void MainWnd::OnPaint() {
       ::DeleteObject(bmp_mem);
       ::DeleteDC(dc_mem);
 
-       rtc::scoped_refptr<MyRTCStatsCollectorCallback> stasRefpt = new rtc::RefCountedObject<MyRTCStatsCollectorCallback>();
-       pc_->GetStats(stasRefpt);
+      //if (statsCounter % 1000 == 0) {
+      //  rtc::scoped_refptr<MyRTCStatsCollectorCallback> stasRefpt =
+      //      new rtc::RefCountedObject<MyRTCStatsCollectorCallback>();
+      //  pc_->GetStats(stasRefpt);
+      //}
+      //statsCounter++;
+      //if (statsCounter > 1000000)
+      //  statsCounter = 0;
+       
     } else {
       // We're still waiting for the video stream to be initialized.
       HBRUSH brush = ::CreateSolidBrush(RGB(0, 0, 0));
@@ -719,6 +726,6 @@ void MainWnd::RemoteVideoRenderer::OnFrame(
       mTalk->savedImage++;
     }
   }
-
+  
   InvalidateRect(wnd_, NULL, TRUE);
 }

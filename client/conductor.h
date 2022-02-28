@@ -22,7 +22,6 @@
 #include "examples/peerconnection/client/main_wnd.h"
 #include "examples/peerconnection/client/peer_connection_client.h"
 #include "rtc_base/thread.h"
-#include "api/stats/rtc_stats_collector_callback.h"
 
 namespace webrtc {
 class VideoCaptureModule;
@@ -31,14 +30,6 @@ class VideoCaptureModule;
 namespace cricket {
 class VideoRenderer;
 }  // namespace cricket
-
-//class MyRTCStatsCollectorCallback : virtual public webrtc::RTCStatsCollectorCallback {
-// public:
-//  void OnStatsDelivered(const rtc::scoped_refptr<const webrtc::RTCStatsReport>& report) {
-//    std::string json = report->ToJson();
-//    RTC_LOG(INFO) << __FUNCTION__ << ": " << json;
-//  }
-//};
 
 class Conductor : public webrtc::PeerConnectionObserver,
                   public webrtc::CreateSessionDescriptionObserver,

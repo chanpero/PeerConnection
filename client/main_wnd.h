@@ -53,6 +53,8 @@ class MyRTCStatsCollectorCallback
 class MainWindow {
  public:
   rtc::scoped_refptr<webrtc::PeerConnectionInterface> pc_;
+  int statsCounter = 0;
+
   virtual ~MainWindow() {}
 
   enum UI {
